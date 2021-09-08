@@ -74,3 +74,32 @@ class BloggerClient:
             raise
         json_data = resp.json()
         return BloggerPost.from_api_response(json_data)
+
+    def update_post(
+        self,
+        blog_id: str,
+        post_id: str,
+        title: Optional[str] = None,
+        html_content: Optional[str] = None,
+    ) -> BloggerPost:
+        if self._session is None:
+            raise ValueError("session is not initialized")
+        payload = {}
+        if title is not None:
+            payload["title"] = title
+
+        if html_content is not None:
+            payload["content"] = html_content
+
+        resp = self._session.post(
+            f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts/{post_id}",
+            json=payload,
+        )
+
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            print(f"unable to update post for blog: {blog_id} {post_id} - {e}")
+            raise
+        json_data = resp.json()
+        return BloggerPost.from_api_response(json_data)

@@ -77,6 +77,43 @@ class TestBloggerClient:
         assert new_post.id == posts_create_response["id"]
         assert new_post.html_content == posts_create_response["content"]
 
+    def test_update_post(self):
+        # Given a blogger posts create response
+        blog_id = "4660844935009290279"
+        posts_create_response = fixtures[
+            "posts_create"
+        ]  # this works for patch requests also
+
+        data = {
+            "blog_id": blog_id,
+            "post_id": "342342342342",
+            "title": "new post!",
+            "html_content": "<h1>hello there</h1>",
+        }
+
+        # And the session returns the response
+        session, _ = create_mock_session(
+            {
+                "post": {
+                    f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts/{data['post_id']}": posts_create_response
+                }
+            }
+        )
+        client = BloggerClient.from_authorized_session(session)
+
+        # When the client receives a request to update a post
+        new_post = client.update_post(
+            blog_id=data["blog_id"],
+            post_id=data["post_id"],
+            title=data["title"],
+            html_content=data["html_content"],
+        )
+
+        # Then it creates the post
+        assert new_post.id == posts_create_response["id"]
+        assert new_post.html_content == posts_create_response["content"]
+
+
 def create_mock_session(config):
     def _mock_request(method, url, *args, **kwargs):
         return mock.MagicMock(**{"json.return_value": config[method.lower()][url]})
