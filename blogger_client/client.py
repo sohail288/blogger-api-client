@@ -58,3 +58,19 @@ class BloggerClient:
             raise
         json_data = resp.json()
         return [BloggerPost.from_api_response(item) for item in json_data["items"]]
+
+    def create_post(self, blog_id: str, title: str, html_content: str) -> BloggerPost:
+        if self._session is None:
+            raise ValueError("session is not initialized")
+        resp = self._session.post(
+            f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts",
+            json={"title": title, "content": html_content},
+        )
+
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            print(f"unable to get posts for blog: {blog_id} - {e}")
+            raise
+        json_data = resp.json()
+        return BloggerPost.from_api_response(json_data)

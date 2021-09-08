@@ -45,6 +45,37 @@ class TestBloggerClient:
 
         assert posts[0].html_content == "<h1>lol</h1>"
 
+    def test_create_post(self):
+        # Given a blogger posts create response
+        blog_id = "4660844935009290279"
+        posts_create_response = fixtures["posts_create"]
+
+        data = {
+            "blog_id": blog_id,
+            "title": "new post!",
+            "html_content": "<h1>hello there</h1>",
+        }
+
+        # And the session returns the response
+        session, _ = create_mock_session(
+            {
+                "post": {
+                    f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts": posts_create_response
+                }
+            }
+        )
+        client = BloggerClient.from_authorized_session(session)
+
+        # When the client receives a request to create a post
+        new_post = client.create_post(
+            blog_id=data["blog_id"],
+            title=data["title"],
+            html_content=data["html_content"],
+        )
+
+        # Then it creates the post
+        assert new_post.id == posts_create_response["id"]
+        assert new_post.html_content == posts_create_response["content"]
 
 def create_mock_session(config):
     def _mock_request(method, url, *args, **kwargs):
