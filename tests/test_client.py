@@ -17,6 +17,25 @@ class TestBloggerClient:
         # Then it successfully uses that session
         assert client._session is session
 
+    def test_create_session_from_client_secrets(self):
+        # Given that there is a client secrets file
+        filepath = "./fake-file.json"
+
+        # When a session is created from the client secrets
+        with mock.patch(
+            "google_auth_oauthlib.flow.InstalledAppFlow"
+        ) as mocked_app_flow:
+            mock_session = mock.MagicMock()
+            mocked_app_flow.from_client_secrets_file.return_value = mock.MagicMock(
+                **{"authorized_session.return_value": mock_session}
+            )
+            returned_mocked_session = BloggerClient.create_session_from_client_secrets(
+                filepath
+            )
+
+        # Then it creates the expected session
+        assert returned_mocked_session is mock_session
+
     def test_get_all_posts(self):
         # Given an authorized session that can access a certain blog
         blog_id = "4660844935009290279"

@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 import requests
+from google_auth_oauthlib.flow import InstalledAppFlow
 
 from blogger_client import constants
 
@@ -38,6 +39,20 @@ class BloggerPost:
 class BloggerClient:
     def __init__(self, *, session: Optional[requests.Session] = None) -> None:
         self._session = session
+
+    @staticmethod
+    def create_session_from_client_secrets(filepath: str) -> requests.Session:
+        from google_auth_oauthlib.flow import InstalledAppFlow
+
+        scopes = [
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "openid",
+            "https://www.googleapis.com/auth/blogger",
+        ]
+        iaf = InstalledAppFlow.from_client_secrets_file(filepath, scopes=scopes)
+        iaf.run_local_server(port=8082)
+        return iaf.authorized_session()
 
     @classmethod
     def from_authorized_session(cls, session: requests.Session) -> "BloggerClient":
