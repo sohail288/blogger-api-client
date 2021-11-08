@@ -22,16 +22,12 @@ class TestBloggerClient:
         filepath = "./fake-file.json"
 
         # When a session is created from the client secrets
-        with mock.patch(
-            "google_auth_oauthlib.flow.InstalledAppFlow"
-        ) as mocked_app_flow:
+        with mock.patch("google_auth_oauthlib.flow.InstalledAppFlow") as mocked_app_flow:
             mock_session = mock.MagicMock()
             mocked_app_flow.from_client_secrets_file.return_value = mock.MagicMock(
                 **{"authorized_session.return_value": mock_session}
             )
-            returned_mocked_session = BloggerClient.create_session_from_client_secrets(
-                filepath
-            )
+            returned_mocked_session = BloggerClient.create_session_from_client_secrets(filepath)
 
         # Then it creates the expected session
         assert returned_mocked_session is mock_session
@@ -40,13 +36,7 @@ class TestBloggerClient:
         # Given an authorized session that can access a certain blog
         blog_id = "4660844935009290279"
         session, _ = create_mock_session(
-            {
-                "get": {
-                    f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts": fixtures[
-                        "posts"
-                    ]
-                }
-            }
+            {"get": {f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts": fixtures["posts"]}}
         )
         client = BloggerClient.from_authorized_session(session)
 
@@ -77,11 +67,7 @@ class TestBloggerClient:
 
         # And the session returns the response
         session, _ = create_mock_session(
-            {
-                "post": {
-                    f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts": posts_create_response
-                }
-            }
+            {"post": {f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts": posts_create_response}}
         )
         client = BloggerClient.from_authorized_session(session)
 
@@ -99,9 +85,7 @@ class TestBloggerClient:
     def test_update_post(self):
         # Given a blogger posts create response
         blog_id = "4660844935009290279"
-        posts_create_response = fixtures[
-            "posts_create"
-        ]  # this works for patch requests also
+        posts_create_response = fixtures["posts_create"]  # this works for patch requests also
 
         data = {
             "blog_id": blog_id,
@@ -113,7 +97,7 @@ class TestBloggerClient:
         # And the session returns the response
         session, _ = create_mock_session(
             {
-                "post": {
+                "patch": {
                     f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts/{data['post_id']}": posts_create_response
                 }
             }
@@ -138,9 +122,7 @@ def create_mock_session(config):
         return mock.MagicMock(**{"json.return_value": config[method.lower()][url]})
 
     def _get_wrapper(method):
-        return lambda *args, **kwargs: getattr(requests.Session, method)(
-            m, *args, **kwargs
-        )
+        return lambda *args, **kwargs: getattr(requests.Session, method)(m, *args, **kwargs)
 
     def mount(method, url, response):
         responses = config.setdefault(method.lower(), {})

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
 
 import requests
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -63,9 +64,7 @@ class BloggerClient:
     def list_posts(self, blog_id: str) -> list[BloggerPost]:
         if self._session is None:
             raise ValueError("session is not initialized")
-        resp = self._session.get(
-            f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts"
-        )
+        resp = self._session.get(f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts")
         try:
             resp.raise_for_status()
         except Exception as e:
@@ -106,7 +105,7 @@ class BloggerClient:
         if html_content is not None:
             payload["content"] = html_content
 
-        resp = self._session.post(
+        resp = self._session.patch(
             f"{constants.BLOGGER_V3_BASE_URL}/blogs/{blog_id}/posts/{post_id}",
             json=payload,
         )
